@@ -98,6 +98,8 @@ static int build_tree_recursive(IndexEntry *entries, int count, int depth, Objec
     for (int i = 0; i < count; ) {
         char *path = entries[i].path;
         char *start = path;
+        
+        // Skip previously processed slashes based on recursion depth
         for (int d = 0; d < depth; d++) {
             char *next_slash = strchr(start, '/');
             if (next_slash) start = next_slash + 1;
@@ -108,6 +110,7 @@ static int build_tree_recursive(IndexEntry *entries, int count, int depth, Objec
         TreeEntry *entry = &tree.entries[tree.count++];
 
         if (slash) {
+            // Handle Directory entry
             size_t dir_name_len = slash - start;
             strncpy(entry->name, start, dir_name_len);
             entry->name[dir_name_len] = '\0';
@@ -125,19 +128,22 @@ static int build_tree_recursive(IndexEntry *entries, int count, int depth, Objec
             }
             i += sub_count;
         } else {
+            // Handle File entry
             strncpy(entry->name, start, sizeof(entry->name) - 1);
             entry->mode = entries[i].mode;
             if (entry->mode == 0) entry->mode = MODE_FILE;
             
-            // Assuming the member is 'hash' based on typical PES templates
             memcpy(entry->hash.hash, entries[i].hash.hash, HASH_SIZE);
             i++;
         }
     }
 
+    // Serialize and write this tree object to disk
     void *data;
     size_t len;
     if (tree_serialize(&tree, &data, &len) != 0) return -1;
+    
+    // This call creates the actual file in .pes/objects
     if (object_write(OBJ_TREE, data, len, id_out) != 0) {
         free(data);
         return -1;
@@ -149,10 +155,15 @@ static int build_tree_recursive(IndexEntry *entries, int count, int depth, Objec
 
 int tree_from_index(ObjectID *id_out) {
     Index idx;
+    
+    // Load the actual index from .pes/index
     if (index_load(&idx) != 0) return -1;
 
+    // If the index is empty, there's nothing to build
     if (idx.count == 0) return -1;
 
+    // Build the tree recursively starting from the root (depth 0)
     int result = build_tree_recursive(idx.entries, idx.count, 0, id_out);
+    
     return result;
 }
