@@ -167,3 +167,4 @@ int tree_from_index(ObjectID *id_out) {
     
     return result;
 }
+// Phase 2: Tree entry structure
