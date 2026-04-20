@@ -232,3 +232,4 @@ int commit_create(const char *message, ObjectID *commit_id_out) {
 }
 // Phase 4: Commit object structure
 // Phase 4: parent commit links
+// Phase 4: Metadata handling
