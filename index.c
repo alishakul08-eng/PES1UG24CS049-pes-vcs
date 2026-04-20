@@ -193,3 +193,4 @@ int index_add(Index *index, const char *path) {
     return index_save(index);
 }
 // Phase 3: Index file format setup
+// Phase 3: Implement index_load
