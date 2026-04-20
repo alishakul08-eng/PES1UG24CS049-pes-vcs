@@ -176,3 +176,4 @@ int object_read(const ObjectID *id, ObjectType *type_out, void **data_out, size_
     return 0;
 }
 // Phase 1: Setup object directory structure
+// Phase 1: Adding SHA-256 hashing logic
